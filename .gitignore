@@ -1,0 +1,24 @@
+# Dependencias
+node_modules/
+dist/
+dist-server/
+
+# Persistencia local y homelab
+data/
+storage/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Entorno y credenciales
+.env
+.env.local
+jwt.secret
+
+# Logs y temporales
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

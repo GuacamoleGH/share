@@ -1,0 +1,92 @@
+/* =============================================================================
+   GuacamoleGH Share — Tokens de Diseño y Sistema de Temas (Oscuro y Claro)
+   Ecosistema GuacamoleGH: Gama Carbón y Neón Tecnológico
+   ============================================================================= */
+
+:root {
+  /* Modo Oscuro por Defecto (Gama Carbón) */
+  --color-bg-deep: #0c0e12;
+  --color-bg-base: #12151b;
+  --color-surface-card: #181d26;
+  --color-surface-card-hover: #1f2532;
+  --color-surface-elevated: #262d3d;
+  --color-surface-input: #0f131a;
+
+  /* Bordes y Divisores */
+  --color-border-subtle: #222a38;
+  --color-border-highlight: rgba(0, 245, 155, 0.25);
+  --color-border-focus: #00f59b;
+
+  /* Acentos de Marca */
+  --color-accent-green: #00f59b;
+  --color-accent-turquoise: #00d9c4;
+  --color-accent-gradient: linear-gradient(135deg, #00f59b 0%, #00d9c4 100%);
+  --color-danger: #f43f5e;
+  --color-warning: #f59e0b;
+  --color-info: #38bdf8;
+
+  /* Tipografía y Textos */
+  --color-text-primary: #f0f4f8;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-accent: #00f59b;
+
+  /* Estados e Insignias */
+  --color-badge-bg: #132622;
+  --color-badge-border: #1d473b;
+  --color-badge-text: #34d399;
+
+  /* Fuentes */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Radios */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Layout */
+  --container-max-width: 1200px;
+  --header-height: 72px;
+
+  /* Sombras */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 8px 30px -4px rgba(0, 245, 155, 0.12);
+  --shadow-glow: 0 0 25px -5px rgba(0, 245, 155, 0.25);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modo Claro (Light Theme) */
+[data-theme="light"] {
+  --color-bg-deep: #f1f5f9;
+  --color-bg-base: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-card-hover: #f8fafc;
+  --color-surface-elevated: #ffffff;
+  --color-surface-input: #f8fafc;
+
+  --color-border-subtle: #cbd5e1;
+  --color-border-highlight: rgba(0, 200, 120, 0.35);
+  --color-border-focus: #059669;
+
+  --color-accent-green: #059669;
+  --color-accent-turquoise: #0d9488;
+  --color-accent-gradient: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-text-accent: #059669;
+
+  --color-badge-bg: #ecfdf5;
+  --color-badge-border: #a7f3d0;
+  --color-badge-text: #047857;
+
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 24px rgba(5, 150, 105, 0.15);
+  --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.2);
+}

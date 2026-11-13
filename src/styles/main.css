@@ -583,10 +583,62 @@
 .transfer-summary-box {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 22px;
+  margin-bottom: 22px;
   border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.transfer-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.transfer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.transfer-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  background: rgba(0, 245, 155, 0.12);
+  border: 1px solid var(--color-accent-green);
+  color: var(--color-accent-green);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.transfer-meta-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.transfer-summary-action {
+  flex-shrink: 0;
 }
 
 .transfer-meta-tag {
@@ -737,6 +789,18 @@
   .card {
     padding: 20px 16px;
     border-radius: var(--radius-md);
+  }
+  .transfer-summary-box {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .transfer-summary-action {
+    width: 100%;
+  }
+  .transfer-summary-action .btn-primary {
+    width: 100%;
+    justify-content: center;
   }
   .dropzone-container {
     padding: 28px 16px;

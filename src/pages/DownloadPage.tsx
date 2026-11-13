@@ -97,50 +97,42 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
     <div className="site-container download-card-wrapper">
       <div className="card">
         <div className="transfer-summary-box">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-                Transferencia disponible
-              </h1>
+          <div className="transfer-summary-info">
+            <div className="transfer-title-row">
+              <h1 className="transfer-title">Transferencia disponible</h1>
               {transfer.isEphemeral && (
-                <span
-                  className="brand-badge"
-                  style={{
-                    background: 'rgba(0, 245, 155, 0.12)',
-                    borderColor: 'var(--color-accent-green)',
-                    color: 'var(--color-accent-green)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '0.72rem',
-                  }}
-                >
-                  <Zap size={12} />
-                  En Directo
+                <span className="badge-live">
+                  <Zap size={13} />
+                  EN DIRECTO
                 </span>
               )}
             </div>
-            <div style={{ display: 'flex', gap: '16px', marginTop: '6px', flexWrap: 'wrap' }}>
+
+            <div className="transfer-meta-row">
               <span className="transfer-meta-tag">
                 <CheckCircle2 size={15} style={{ color: 'var(--color-accent-green)' }} />
                 {transfer.fileCount} {transfer.fileCount === 1 ? 'archivo' : 'archivos'} ({formatBytes(transfer.totalSize)})
               </span>
               <span className="transfer-meta-tag">
                 <Clock size={15} style={{ color: 'var(--color-warning)' }} />
-                {transfer.isEphemeral ? 'Activa mientras el emisor mantenga la pestaña abierta' : `Caduca el ${expiryDate}`}
+                {transfer.isEphemeral
+                  ? 'Activa mientras el emisor mantenga la pestaña abierta'
+                  : `Caduca el ${expiryDate}`}
               </span>
             </div>
           </div>
 
           {transfer.files.length > 1 && (
-            <a
-              href={`/api/download/${encodeURIComponent(token)}/zip`}
-              className="btn-primary"
-              title="Descargar todos los archivos comprimidos en ZIP"
-            >
-              <Archive size={18} />
-              <span>Descargar todo (.ZIP)</span>
-            </a>
+            <div className="transfer-summary-action">
+              <a
+                href={`/api/download/${encodeURIComponent(token)}/zip`}
+                className="btn-primary"
+                title="Descargar todos los archivos comprimidos en ZIP"
+              >
+                <Archive size={18} />
+                <span>Descargar todo (.ZIP)</span>
+              </a>
+            </div>
           )}
         </div>
 

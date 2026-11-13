@@ -32,6 +32,7 @@ export interface PublicTransfer {
   fileCount: number;
   downloadCount: number;
   isExpired: boolean;
+  isEphemeral?: boolean;
   files: TransferFile[];
 }
 
@@ -40,6 +41,7 @@ export interface CreateTransferResponse {
   publicToken: string;
   managementToken: string;
   expiresAt: string;
+  isEphemeral?: boolean;
   totalSize: number;
   fileCount: number;
   files: Array<{

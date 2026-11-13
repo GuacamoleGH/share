@@ -11,6 +11,7 @@ import { api, uploadFileChunks, MAX_FILE_SIZE, MAX_TRANSFER_SIZE, formatBytes } 
 export const UploadPage: React.FC = () => {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [expiryHours, setExpiryHours] = useState<number>(24);
+  const [isEphemeral, setIsEphemeral] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [overallProgress, setOverallProgress] = useState<number>(0);
   const [uploadedBytes, setUploadedBytes] = useState<number>(0);
@@ -86,7 +87,7 @@ export const UploadPage: React.FC = () => {
         })),
       };
 
-      const transferMeta = await api.createTransfer(expiryHours, initPayload.files);
+      const transferMeta = await api.createTransfer(expiryHours, initPayload.files, isEphemeral);
 
       // Mapa para asociar archivo local con el fileId retornado por backend
       const fileIdMap = new Map<string, string>();
@@ -170,6 +171,7 @@ export const UploadPage: React.FC = () => {
           publicToken={completedTransfer.publicToken}
           managementToken={completedTransfer.managementToken}
           expiresAt={completedTransfer.expiresAt}
+          isEphemeral={completedTransfer.isEphemeral}
           totalSize={completedTransfer.totalSize}
           fileCount={completedTransfer.fileCount}
           onReset={handleReset}
@@ -218,7 +220,12 @@ export const UploadPage: React.FC = () => {
         <FileQueue files={files} onRemoveFile={handleRemoveFile} isUploading={isUploading} />
 
         {files.length > 0 && !isUploading && (
-          <ExpirySelector selectedHours={expiryHours} onChange={setExpiryHours} />
+          <ExpirySelector
+            selectedHours={expiryHours}
+            onChangeHours={setExpiryHours}
+            isEphemeral={isEphemeral}
+            onChangeEphemeral={setIsEphemeral}
+          />
         )}
 
         {isUploading && (

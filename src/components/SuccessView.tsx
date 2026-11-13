@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Check, Copy, ExternalLink, Trash2, ArrowLeft } from 'lucide-react';
-import { formatBytes } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { Check, Copy, ExternalLink, Trash2, ArrowLeft, Zap } from 'lucide-react';
+import { formatBytes, api } from '../services/api';
 
 interface SuccessViewProps {
   publicToken: string;
   managementToken: string;
   expiresAt: string;
+  isEphemeral?: boolean;
   totalSize: number;
   fileCount: number;
   onReset: () => void;
@@ -16,6 +17,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
   publicToken,
   managementToken,
   expiresAt,
+  isEphemeral = false,
   totalSize,
   fileCount,
   onReset,
@@ -26,7 +28,36 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const publicUrl = `${window.location.origin}/d/${publicToken}`;
-  const expiryDate = new Date(expiresAt).toLocaleString();
+  const expiryDate = new Date(expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date(expiresAt).toLocaleDateString() + ')';
+
+  // Si es modo efímero (JustBeamIt), mantener latidos y destruir al cerrar pestaña
+  useEffect(() => {
+    if (!isEphemeral) return;
+
+    // Enviar latidos periódicos cada 15 segundos para mantener viva la transferencia
+    const interval = setInterval(() => {
+      api.pingEphemeral(managementToken);
+    }, 15000);
+
+    // Al cerrar o salir de la pestaña, enviar señal inmediata con sendBeacon para purga del servidor
+    const handleClose = () => {
+      const url = `/api/manage/${encodeURIComponent(managementToken)}/close`;
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, '');
+      } else {
+        fetch(url, { method: 'POST', keepalive: true }).catch(() => {});
+      }
+    };
+
+    window.addEventListener('beforeunload', handleClose);
+    window.addEventListener('pagehide', handleClose);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleClose);
+      window.removeEventListener('pagehide', handleClose);
+    };
+  }, [isEphemeral, managementToken]);
 
   const handleCopyPublic = async () => {
     try {
@@ -68,9 +99,40 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
           ¡Transferencia lista!
         </h2>
         <p style={{ color: 'var(--color-text-secondary)', marginTop: '4px', fontSize: '0.95rem' }}>
-          {fileCount} {fileCount === 1 ? 'archivo' : 'archivos'} ({formatBytes(totalSize)}) disponibles hasta el {expiryDate}
+          {fileCount} {fileCount === 1 ? 'archivo' : 'archivos'} ({formatBytes(totalSize)})
         </p>
       </div>
+
+      {/* Aviso específico de JustBeamIt */}
+      {isEphemeral ? (
+        <div
+          style={{
+            background: 'rgba(0, 245, 155, 0.08)',
+            border: '1px solid var(--color-accent-green)',
+            borderRadius: 'var(--radius-md)',
+            padding: '12px 16px',
+            width: '100%',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+          }}
+        >
+          <div style={{ color: 'var(--color-accent-green)', marginTop: '2px' }}>
+            <Zap size={20} />
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+            <strong style={{ color: 'var(--color-accent-green)' }}>Modo En Vivo (JustBeamIt) activo:</strong>
+            <p style={{ marginTop: '2px', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+              Mantén esta pestaña abierta mientras descargan los archivos. En cuanto salgas o cierres esta ventana, los archivos se eliminarán del servidor automáticamente.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          Caducidad programada: {expiryDate}
+        </div>
+      )}
 
       {/* Enlace público */}
       <div style={{ width: '100%', textAlign: 'left' }}>
@@ -145,7 +207,13 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
       <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '16px', width: '100%' }}>
         <button
           type="button"
-          onClick={onReset}
+          onClick={() => {
+            if (isEphemeral) {
+              // Si el emisor pulsa en subir otra transferencia, eliminamos la anterior
+              onDeleteNow(managementToken).catch(() => {});
+            }
+            onReset();
+          }}
           className="btn-outline"
           style={{ width: '100%', justifyContent: 'center' }}
         >

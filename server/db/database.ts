@@ -49,6 +49,19 @@ export function getDb(): any {
     dbInstance.exec(schemaSql);
   }
 
+  // Migraciones automáticas: columnas is_ephemeral y last_ping
+  try {
+    const cols = dbInstance.prepare("PRAGMA table_info(transfers)").all();
+    if (cols.length > 0 && !cols.some((c: any) => c.name === 'is_ephemeral')) {
+      dbInstance.exec("ALTER TABLE transfers ADD COLUMN is_ephemeral INTEGER NOT NULL DEFAULT 0;");
+    }
+    if (cols.length > 0 && !cols.some((c: any) => c.name === 'last_ping')) {
+      dbInstance.exec("ALTER TABLE transfers ADD COLUMN last_ping TEXT;");
+    }
+  } catch (err) {
+    console.error('[Migration Error transfers]', err);
+  }
+
   return dbInstance;
 }
 

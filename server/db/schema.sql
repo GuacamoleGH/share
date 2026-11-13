@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS transfers (
   expires_at TEXT NOT NULL,
   total_size INTEGER NOT NULL DEFAULT 0,
   file_count INTEGER NOT NULL DEFAULT 0,
-  download_count INTEGER NOT NULL DEFAULT 0
+  download_count INTEGER NOT NULL DEFAULT 0,
+  is_ephemeral INTEGER NOT NULL DEFAULT 0,
+  last_ping TEXT
 );
 
 CREATE TABLE IF NOT EXISTS files (

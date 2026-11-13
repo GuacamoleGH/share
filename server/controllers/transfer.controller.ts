@@ -14,7 +14,7 @@ export class TransferController {
    */
   static create(req: Request, res: Response) {
     try {
-      const { expiryHours, files } = req.body;
+      const { expiryHours, isEphemeral, files } = req.body;
 
       if (!files || !Array.isArray(files) || files.length === 0) {
         res.status(400).json({ error: 'La transferencia debe contener al menos un archivo.' });
@@ -23,6 +23,7 @@ export class TransferController {
 
       const result = TransferService.createTransfer({
         expiryHours: Number(expiryHours) || 24,
+        isEphemeral: Boolean(isEphemeral),
         files
       });
 
@@ -140,7 +141,8 @@ export class TransferController {
 
   /**
    * DELETE /api/manage/:token
-   * Elimina una transferencia usando su token de gestión secreto.
+   * POST /api/manage/:token/close
+   * Elimina una transferencia usando su token de gestión secreto (soporta navigator.sendBeacon).
    */
   static deleteByManagementToken(req: Request, res: Response) {
     try {
@@ -159,6 +161,25 @@ export class TransferController {
       res.json({ message: 'Transferencia eliminada exitosamente.' });
     } catch (err: any) {
       res.status(500).json({ error: 'Error al eliminar la transferencia.' });
+    }
+  }
+
+  /**
+   * POST /api/manage/:token/ping
+   * Heartbeat para transferencias efímeras (JustBeamIt).
+   */
+  static pingEphemeral(req: Request, res: Response) {
+    try {
+      const token = req.params.token as string;
+      if (!token) {
+        res.status(400).json({ error: 'Token de gestión no proporcionado.' });
+        return;
+      }
+
+      const ok = TransferService.pingEphemeral(token);
+      res.json({ success: ok });
+    } catch {
+      res.status(500).json({ error: 'Error al registrar latido efímero.' });
     }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Download, Archive, Clock, AlertTriangle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Download, Archive, Clock, AlertTriangle, ArrowLeft, CheckCircle2, Zap } from 'lucide-react';
 import { PublicTransfer } from '../types';
 import { api, formatBytes } from '../services/api';
 import { FileIcon } from '../components/FileIcon';
@@ -75,7 +75,9 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
           </h1>
 
           <p style={{ color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto 28px', fontSize: '0.95rem' }}>
-            {transfer?.isExpired
+            {transfer?.isEphemeral
+              ? 'Esta transferencia era efímera (estilo JustBeamIt) y ha finalizado porque el emisor ha cerrado la pestaña o expiró el tiempo.'
+              : transfer?.isExpired
               ? 'Esta transferencia ha superado su fecha de caducidad y sus archivos han sido eliminados de forma segura.'
               : 'El enlace proporcionado no existe, es inválido o la transferencia aún no ha finalizado su subida.'}
           </p>
@@ -89,16 +91,35 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
     );
   }
 
-  const expiryDate = new Date(transfer.expiresAt).toLocaleString();
+  const expiryDate = new Date(transfer.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date(transfer.expiresAt).toLocaleDateString() + ')';
 
   return (
     <div className="site-container download-card-wrapper">
       <div className="card">
         <div className="transfer-summary-box">
           <div>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-              Transferencia disponible
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
+                Transferencia disponible
+              </h1>
+              {transfer.isEphemeral && (
+                <span
+                  className="brand-badge"
+                  style={{
+                    background: 'rgba(0, 245, 155, 0.12)',
+                    borderColor: 'var(--color-accent-green)',
+                    color: 'var(--color-accent-green)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  <Zap size={12} />
+                  En Vivo (JustBeamIt)
+                </span>
+              )}
+            </div>
             <div style={{ display: 'flex', gap: '16px', marginTop: '6px', flexWrap: 'wrap' }}>
               <span className="transfer-meta-tag">
                 <CheckCircle2 size={15} style={{ color: 'var(--color-accent-green)' }} />
@@ -106,7 +127,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
               </span>
               <span className="transfer-meta-tag">
                 <Clock size={15} style={{ color: 'var(--color-warning)' }} />
-                Caduca el {expiryDate}
+                {transfer.isEphemeral ? 'Activa mientras el emisor mantenga la pestaña abierta' : `Caduca el ${expiryDate}`}
               </span>
             </div>
           </div>

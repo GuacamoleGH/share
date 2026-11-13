@@ -15,7 +15,8 @@ export interface CreateFileInput {
 }
 
 export interface CreateTransferInput {
-  expiryHours: number; // 24, 72, 168, 336 (1, 3, 7, 14 días)
+  expiryHours: number; // máximo 24 horas (1 día); opciones cortas: 10m (0.1667), 30m (0.5), 1h (1), 6h (6), 24h (24)
+  isEphemeral?: boolean; // Modo JustBeamIt: se destruye cuando el emisor cierra la pestaña
   files: CreateFileInput[];
 }
 
@@ -52,13 +53,19 @@ export class TransferService {
     const publicTokenHash = hashToken(publicToken);
     const managementTokenHash = hashToken(managementToken);
 
-    // Calcular fecha de caducidad
-    const validHours = [24, 72, 168, 336].includes(input.expiryHours) ? input.expiryHours : 24;
-    const expiresAt = new Date(Date.now() + validHours * 60 * 60 * 1000).toISOString();
+    // Caducidad máxima permitida: 1 día (24 horas). Opciones cortas: 10m, 30m, 1h, 6h, 24h
+    let requestedHours = Number(input.expiryHours) || 24;
+    if (requestedHours > 24) requestedHours = 24;
+    if (requestedHours < 0.05) requestedHours = 0.1667; // Mínimo ~10 min
+
+    const isEphemeral = Boolean(input.isEphemeral);
+    // Si es efímero (JustBeamIt), límite de seguridad de 2h en caso de corte brusco
+    const effectiveHours = isEphemeral ? Math.min(requestedHours, 2) : requestedHours;
+    const expiresAt = new Date(Date.now() + effectiveHours * 60 * 60 * 1000).toISOString();
 
     const stmtTransfer = db.prepare(`
-      INSERT INTO transfers (id, public_token_hash, management_token_hash, status, expires_at, total_size, file_count)
-      VALUES (?, ?, ?, 'pending', ?, ?, ?)
+      INSERT INTO transfers (id, public_token_hash, management_token_hash, status, expires_at, total_size, file_count, is_ephemeral, last_ping)
+      VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?)
     `);
 
     stmtTransfer.run(
@@ -67,7 +74,9 @@ export class TransferService {
       managementTokenHash,
       expiresAt,
       totalTransferSize,
-      input.files.length
+      input.files.length,
+      isEphemeral ? 1 : 0,
+      new Date().toISOString()
     );
 
     const stmtFile = db.prepare(`
@@ -105,6 +114,7 @@ export class TransferService {
       publicToken,
       managementToken,
       expiresAt,
+      isEphemeral,
       totalSize: totalTransferSize,
       fileCount: input.files.length,
       files: createdFiles
@@ -119,7 +129,7 @@ export class TransferService {
     const publicHash = hashToken(token);
 
     const transfer = db.prepare(`
-      SELECT id, status, created_at, completed_at, expires_at, total_size, file_count, download_count
+      SELECT id, status, created_at, completed_at, expires_at, total_size, file_count, download_count, is_ephemeral, last_ping
       FROM transfers
       WHERE public_token_hash = ?
     `).get(publicHash);
@@ -140,6 +150,7 @@ export class TransferService {
         id: transfer.id,
         status: transfer.status,
         expiresAt: transfer.expires_at,
+        isEphemeral: Boolean(transfer.is_ephemeral),
         isExpired: true,
         files: []
       };
@@ -157,6 +168,7 @@ export class TransferService {
       createdAt: transfer.created_at,
       completedAt: transfer.completed_at,
       expiresAt: transfer.expires_at,
+      isEphemeral: Boolean(transfer.is_ephemeral),
       totalSize: transfer.total_size,
       fileCount: transfer.file_count,
       downloadCount: transfer.download_count,
@@ -169,6 +181,25 @@ export class TransferService {
         checksum: f.checksum
       }))
     };
+  }
+
+  /**
+   * Mantiene viva una transferencia efímera (estilo JustBeamIt) mientras el emisor tenga abierta la pestaña.
+   */
+  static pingEphemeral(managementToken: string): boolean {
+    const db = getDb();
+    const mgmtHash = hashToken(managementToken);
+    const now = new Date().toISOString();
+    // Amplía caducidad en 5 minutos mientras sigan llegando pings
+    const extendedExpiry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    const result = db.prepare(`
+      UPDATE transfers
+      SET last_ping = ?, expires_at = CASE WHEN expires_at < ? THEN ? ELSE expires_at END
+      WHERE management_token_hash = ? AND status = 'completed' AND is_ephemeral = 1
+    `).run(now, extendedExpiry, extendedExpiry, mgmtHash);
+
+    return result.changes > 0;
   }
 
   /**

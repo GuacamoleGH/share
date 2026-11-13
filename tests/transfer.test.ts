@@ -150,4 +150,35 @@ describe('GuacamoleGH Share — Sistema de Transferencia y Subida Fragmentada', 
     expect(stats.chunksSizeBytes).toBeGreaterThanOrEqual(0);
     expect(stats.lifetimeTransfersCount).toBeGreaterThanOrEqual(1);
   });
+
+  it('7. Debe gestionar transferencias efímeras (modo JustBeamIt) y destruirlas al cerrar', async () => {
+    const transfer = TransferService.createTransfer({
+      expiryHours: 0.1667, // 10 min
+      isEphemeral: true,
+      files: [{ originalName: 'beam-secret.txt', mimeType: 'text/plain', size: 14 }]
+    });
+
+    expect(transfer.isEphemeral).toBe(true);
+    const fileId = transfer.files[0]?.id!;
+    const session = UploadService.initUploadSession(transfer.transferId, fileId, 1);
+    await UploadService.saveChunk(session.sessionId, 0, Buffer.from('JustBeamItTest'));
+    await UploadService.completeUploadSession(session.sessionId);
+
+    // Verificar que está activa
+    const publicData = TransferService.getTransferByPublicToken(transfer.publicToken);
+    expect(publicData?.isEphemeral).toBe(true);
+    expect(publicData?.status).toBe('completed');
+
+    // Comprobar heartbeat ping
+    const pingOk = TransferService.pingEphemeral(transfer.managementToken);
+    expect(pingOk).toBe(true);
+
+    // Simular cierre de pestaña del emisor (sendBeacon)
+    const deleteOk = TransferService.deleteByManagementToken(transfer.managementToken);
+    expect(deleteOk).toBe(true);
+
+    // Al cerrarse, ya no debe estar disponible
+    const afterClose = TransferService.getTransferByPublicToken(transfer.publicToken);
+    expect(afterClose).toBeNull();
+  });
 });

@@ -62,6 +62,8 @@ apiRouter.get('/health', (_req, res) => {
 apiRouter.post('/transfers', createTransferLimiter, verifyTurnstile, TransferController.create);
 apiRouter.get('/transfers/:token', generalLimiter, TransferController.getPublic);
 apiRouter.delete('/manage/:token', generalLimiter, TransferController.deleteByManagementToken);
+apiRouter.post('/manage/:token/close', generalLimiter, TransferController.deleteByManagementToken);
+apiRouter.post('/manage/:token/ping', generalLimiter, TransferController.pingEphemeral);
 
 // Sesiones de subida y fragmentos
 apiRouter.post('/uploads', generalLimiter, UploadController.initSession);

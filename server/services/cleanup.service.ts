@@ -14,11 +14,14 @@ export class CleanupService {
   static cleanupExpiredTransfers(): number {
     const db = getDb();
     const now = new Date().toISOString();
+    // 45 segundos sin latido para transferencias efímeras cerradas
+    const ephemeralCutoff = new Date(Date.now() - 45 * 1000).toISOString();
 
     const expired = db.prepare(`
       SELECT id FROM transfers
-      WHERE expires_at < ? AND status NOT IN ('expired', 'deleted')
-    `).all(now);
+      WHERE (expires_at < ? OR (is_ephemeral = 1 AND status = 'completed' AND (last_ping IS NULL OR last_ping < ?)))
+        AND status NOT IN ('expired', 'deleted')
+    `).all(now, ephemeralCutoff);
 
     let cleanedCount = 0;
     const filesDir = getFilesStoragePath();

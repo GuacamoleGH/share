@@ -41,15 +41,30 @@ export function formatSeconds(seconds: number): string {
 }
 
 export const api = {
-  async createTransfer(expiryHours: number, files: Array<{ originalName: string; mimeType: string; size: number }>): Promise<CreateTransferResponse> {
+  async createTransfer(
+    expiryHours: number,
+    files: Array<{ originalName: string; mimeType: string; size: number }>,
+    isEphemeral = false
+  ): Promise<CreateTransferResponse> {
     const res = await fetch('/api/transfers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ expiryHours, files }),
+      body: JSON.stringify({ expiryHours, files, isEphemeral }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al iniciar la transferencia.');
     return data;
+  },
+
+  async pingEphemeral(managementToken: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/manage/${encodeURIComponent(managementToken)}/ping`, {
+        method: 'POST',
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   },
 
   async getTransfer(token: string): Promise<PublicTransfer> {

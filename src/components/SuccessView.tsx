@@ -59,20 +59,63 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
     };
   }, [isEphemeral, managementToken]);
 
-  const handleCopyPublic = async () => {
+  // Función universal para copiar al portapapeles (compatible con HTTPS y con HTTP/IPs locales)
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {}
+    }
+
+    // Fallback universal para navegadores en conexiones HTTP (IPs locales o Tailscale)
     try {
-      await navigator.clipboard.writeText(publicUrl);
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.width = '1px';
+      textArea.style.height = '1px';
+      textArea.style.padding = '0';
+      textArea.style.border = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.boxShadow = 'none';
+      textArea.style.background = 'transparent';
+      textArea.setAttribute('readonly', '');
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      textArea.setSelectionRange(0, text.length);
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCopyPublic = async () => {
+    const ok = await copyToClipboard(publicUrl);
+    if (ok) {
       setCopiedPublic(true);
       setTimeout(() => setCopiedPublic(false), 2500);
-    } catch {}
+    } else {
+      // Si por alguna razón el navegador bloquea ambos métodos, seleccionamos el texto del input
+      const input = document.querySelector('.share-link-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
   };
 
   const handleCopyMgmt = async () => {
-    try {
-      await navigator.clipboard.writeText(managementToken);
+    const ok = await copyToClipboard(managementToken);
+    if (ok) {
       setCopiedMgmt(true);
       setTimeout(() => setCopiedMgmt(false), 2500);
-    } catch {}
+    }
   };
 
   const handleDelete = async () => {

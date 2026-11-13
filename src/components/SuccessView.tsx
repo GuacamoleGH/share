@@ -122,7 +122,7 @@ export const SuccessView: React.FC<SuccessViewProps> = ({
             <Zap size={20} />
           </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-            <strong style={{ color: 'var(--color-accent-green)' }}>Modo En Vivo (JustBeamIt) activo:</strong>
+            <strong style={{ color: 'var(--color-accent-green)' }}>Transferencia en Directo activa:</strong>
             <p style={{ marginTop: '2px', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
               Mantén esta pestaña abierta mientras descargan los archivos. En cuanto salgas o cierres esta ventana, los archivos se eliminarán del servidor automáticamente.
             </p>

@@ -76,7 +76,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
 
           <p style={{ color: 'var(--color-text-secondary)', maxWidth: '500px', margin: '0 auto 28px', fontSize: '0.95rem' }}>
             {transfer?.isEphemeral
-              ? 'Esta transferencia era efímera (estilo JustBeamIt) y ha finalizado porque el emisor ha cerrado la pestaña o expiró el tiempo.'
+              ? 'Esta transferencia era en directo y ha finalizado porque el emisor ha cerrado la pestaña o expiró el tiempo.'
               : transfer?.isExpired
               ? 'Esta transferencia ha superado su fecha de caducidad y sus archivos han sido eliminados de forma segura.'
               : 'El enlace proporcionado no existe, es inválido o la transferencia aún no ha finalizado su subida.'}
@@ -116,7 +116,7 @@ export const DownloadPage: React.FC<DownloadPageProps> = ({ token }) => {
                   }}
                 >
                   <Zap size={12} />
-                  En Vivo (JustBeamIt)
+                  En Directo
                 </span>
               )}
             </div>

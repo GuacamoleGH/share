@@ -63,7 +63,7 @@ export const ExpirySelector: React.FC<ExpirySelectorProps> = ({
           </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.92rem', color: isEphemeral ? 'var(--color-accent-green)' : 'var(--color-text-primary)' }}>
-              Modo Efímero en Vivo (Estilo JustBeamIt)
+              Transferencia en Directo
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
               El archivo se destruye y elimina del servidor en cuanto cierres esta pestaña.

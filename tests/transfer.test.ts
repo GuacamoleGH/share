@@ -151,7 +151,7 @@ describe('GuacamoleGH Share — Sistema de Transferencia y Subida Fragmentada', 
     expect(stats.lifetimeTransfersCount).toBeGreaterThanOrEqual(1);
   });
 
-  it('7. Debe gestionar transferencias efímeras (modo JustBeamIt) y destruirlas al cerrar', async () => {
+  it('7. Debe gestionar transferencias en directo y destruirlas al cerrar pestaña', async () => {
     const transfer = TransferService.createTransfer({
       expiryHours: 0.1667, // 10 min
       isEphemeral: true,

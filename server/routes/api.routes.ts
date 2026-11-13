@@ -71,8 +71,8 @@ apiRouter.put('/uploads/:id/chunks/:index', rawBodyParser, UploadController.uplo
 apiRouter.post('/uploads/:id/complete', generalLimiter, UploadController.completeSession);
 
 // Descargas públicas
-apiRouter.get('/download/:token/:fileId', generalLimiter, TransferController.downloadFile);
 apiRouter.get('/download/:token/zip', generalLimiter, TransferController.downloadZip);
+apiRouter.get('/download/:token/:fileId', generalLimiter, TransferController.downloadFile);
 
 // ---------------------------------------------------------------------------
 // Panel de Administración (Privado)
